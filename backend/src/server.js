@@ -3,6 +3,7 @@ const express = require('express');
 const routes = require('./routes/routes');
 const path = require('path');
 const reponseHandlers = require('./middlewares/response');
+require('./models/db');
 
 const app = express();
 const port = process.env.PORT;
