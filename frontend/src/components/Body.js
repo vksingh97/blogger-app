@@ -2,31 +2,22 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import {
-  EditOutlined,
-  EllipsisOutlined,
-  SettingOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
-import { Avatar, Card, FloatButton, Modal } from 'antd';
+import { Tabs, Modal, FloatButton } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import CreateBlog from './CreateBlog';
+import AllBlogs from './AllBlogs';
 
-const { Meta } = Card;
+const { TabPane } = Tabs;
+
+const PostImage = styled.img`
+  width: 100%;
+`;
 
 const BodyContainer = styled.div`
   height: 90%;
   display: flex;
   flex-direction: column;
   overflow: auto;
-`;
-const BlogPosts = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-`;
-
-const CardContainer = styled.div`
-  margin: 50px;
 `;
 
 const apiInstance = axios.create({
@@ -36,6 +27,8 @@ const apiInstance = axios.create({
 const Body = () => {
   const [blogPosts, setBlogPosts] = useState([]);
   const [createBlog, setCreateBlog] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
   const getAllPosts = async () => {
     await apiInstance
       .get('/get-posts')
@@ -45,44 +38,30 @@ const Body = () => {
       })
       .catch((err) => console.log(err));
   };
+
   useEffect(() => {
     getAllPosts();
   }, [apiInstance]);
+
   return (
     <BodyContainer>
+      <Tabs defaultActiveKey='1' centered>
+        <TabPane tab='All Posts' key='1'>
+          <AllBlogs blogPosts={blogPosts} setSelectedPost={setSelectedPost} />
+        </TabPane>
+        <TabPane tab='Trending' key='2'>
+          {/* Trending posts content */}
+        </TabPane>
+        <TabPane tab='Favorite' key='3'>
+          {/* Favorite posts content */}
+        </TabPane>
+      </Tabs>
+
       <FloatButton
         icon={<PlusOutlined />}
         tooltip={<div>Create Blog</div>}
         onClick={() => setCreateBlog(true)}
       />
-      <BlogPosts>
-        {blogPosts.map((item) => (
-          <CardContainer>
-            <Card
-              style={{ width: 300 }}
-              cover={
-                <img
-                  alt='example'
-                  src='https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png'
-                />
-              }
-              actions={[
-                <SettingOutlined key='setting' />,
-                <EditOutlined key='edit' />,
-                <EllipsisOutlined key='ellipsis' />,
-              ]}
-            >
-              <Meta
-                avatar={
-                  <Avatar src='https://api.dicebear.com/7.x/miniavs/svg?seed=8' />
-                }
-                title={item.title}
-                description={item.content}
-              />
-            </Card>
-          </CardContainer>
-        ))}
-      </BlogPosts>
       <Modal
         title='Basic Modal'
         open={createBlog}
@@ -90,6 +69,26 @@ const Body = () => {
         onCancel={() => setCreateBlog(false)}
       >
         <CreateBlog />
+      </Modal>
+      <Modal
+        title={selectedPost ? selectedPost.title : ''}
+        visible={selectedPost !== null}
+        onCancel={() => setSelectedPost(null)}
+        footer={null}
+      >
+        {selectedPost && (
+          <>
+            <PostImage
+              src={
+                selectedPost.imageUrl
+                  ? selectedPost.imageUrl
+                  : 'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png'
+              }
+              alt={selectedPost.title}
+            />
+            <div dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
+          </>
+        )}
       </Modal>
     </BodyContainer>
   );

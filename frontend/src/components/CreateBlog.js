@@ -4,15 +4,7 @@ import { UploadOutlined } from '@ant-design/icons';
 import 'react-quill/dist/quill.snow.css'; // Import Quill styles
 import ReactQuill from 'react-quill'; // Import ReactQuill
 import styled from 'styled-components';
-
-// const FormContainer = styled.div`
-//   max-width: 600px;
-//   margin: 0 auto;
-// `;
-
-// const Title = styled.h2`
-//   margin-bottom: 20px;
-// `;
+import axios from 'axios';
 
 const CustomReactQuill = styled(ReactQuill)`
   .ql-toolbar {
@@ -26,6 +18,10 @@ const CustomReactQuill = styled(ReactQuill)`
     height: 300px; /* Adjust height as needed */
   }
 `;
+
+const apiInstance = axios.create({
+  baseURL: 'http://localhost:6001/',
+});
 
 const CreateBlog = () => {
   const [description, setDescription] = useState('');
@@ -65,8 +61,18 @@ const CreateBlog = () => {
     'image',
   ];
 
-  const onFinish = (values) => {
-    console.log('Received values:', values);
+  const onFinish = async (values) => {
+    const formData = new FormData();
+
+    formData.append('title', values.title);
+    formData.append('content', values.description);
+
+    if (values.upload && values.upload.length > 0) {
+      formData.append('file', values.upload[0].originFileObj);
+    }
+
+    const response = await apiInstance.post('/create-blog', formData);
+    console.log(response);
   };
 
   return (

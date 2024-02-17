@@ -19,7 +19,6 @@ module.exports = {
 
   // Controller function for creating a new blog post
   createBlog: async (req, res) => {
-    console.log(req.file, req.body);
     try {
       const { body: bodyData } = req;
       const file = req.file;

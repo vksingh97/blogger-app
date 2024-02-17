@@ -22,7 +22,6 @@ module.exports = {
   },
   createBlog: async ({ payload }) => {
     console.log(payload);
-
     // Verify that the path property is set in the payload.file object
     if (!payload.file || !payload.file.buffer) {
       return { ok: false, err: 'File path is missing or undefined' };
@@ -59,14 +58,13 @@ module.exports = {
       const fileUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
       console.log('File URL:', fileUrl);
 
-      const response = await postModel.create({
+      await postModel.create({
         insertDict: {
           title: payload.title,
           content: payload.content,
           imageUrl: fileUrl,
         },
       });
-      console.log(response);
 
       return { ok: true };
     } catch (error) {
