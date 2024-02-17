@@ -1,5 +1,12 @@
+import React from 'react';
+import BloggerLandingPage from './components/BloggerLandingPage';
+
 function App() {
-  return <div className='App'>Blogging App</div>;
+  return (
+    <div>
+      <BloggerLandingPage />
+    </div>
+  );
 }
 
 export default App;
