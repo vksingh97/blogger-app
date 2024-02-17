@@ -67,7 +67,6 @@ const CreateBlog = () => {
 
   const onFinish = (values) => {
     console.log('Received values:', values);
-    // Handle form submission here, e.g., send data to server
   };
 
   return (

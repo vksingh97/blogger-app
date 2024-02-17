@@ -6,10 +6,11 @@ const PostsModel = mongoose.model(
   'posts',
   new Schema(
     {
-      title: { type: String, default: '' },
-      content: { type: String, default: '' },
+      title: { type: String, required: true },
+      content: { type: String, required: true },
       author: { type: String, default: '' },
       tags: { type: Array, default: [] },
+      imageUrl: { type: String, default: '' },
       comments: { type: Array, default: [] },
       systemIsDeleted: { type: Boolean, default: false },
     },
@@ -39,4 +40,11 @@ module.exports = {
 
   update: async ({ query, updateDict }) =>
     PostsModel.updateMany(query, updateDict),
+
+  getAllPosts: async ({}) => {
+    const posts = await PostsModel.find({})
+      .sort({ systemCreatedAt: -1 })
+      .lean();
+    return posts;
+  },
 };
