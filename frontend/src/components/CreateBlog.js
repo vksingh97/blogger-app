@@ -5,6 +5,7 @@ import 'react-quill/dist/quill.snow.css'; // Import Quill styles
 import ReactQuill from 'react-quill'; // Import ReactQuill
 import styled from 'styled-components';
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const CustomReactQuill = styled(ReactQuill)`
   .ql-toolbar {
@@ -25,6 +26,7 @@ const apiInstance = axios.create({
 
 const CreateBlog = () => {
   const [description, setDescription] = useState('');
+  const userDetails = useSelector((state) => state.userDetails);
 
   const handleChangeDescription = (value) => {
     setDescription(value);
@@ -66,6 +68,8 @@ const CreateBlog = () => {
 
     formData.append('title', values.title);
     formData.append('content', values.description);
+    formData.append('author', userDetails.username);
+    formData.append('authorId', userDetails.id);
 
     if (values.upload && values.upload.length > 0) {
       formData.append('file', values.upload[0].originFileObj);

@@ -8,6 +8,7 @@ const PostsModel = mongoose.model(
       title: { type: String, required: true },
       content: { type: String, required: true },
       author: { type: String, default: '' },
+      authorId: { type: mongoose.Types.ObjectId, required: true },
       tags: { type: Array, default: [] },
       imageUrl: { type: String, default: '' },
       comments: { type: Array, default: [] },

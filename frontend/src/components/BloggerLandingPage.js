@@ -12,7 +12,7 @@ const BloggerLandingPageContainer = styled.div`
   overflow: hidden;
 `;
 
-const BloggerLandingPage = () => {
+const BloggerLandingPage = ({ userDetails }) => {
   return (
     <BloggerLandingPageContainer>
       <Header />

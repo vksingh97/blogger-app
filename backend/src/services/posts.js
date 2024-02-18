@@ -63,6 +63,8 @@ module.exports = {
           title: payload.title,
           content: payload.content,
           imageUrl: fileUrl,
+          authorId: payload.authorId,
+          author: payload.author,
         },
       });
 

@@ -5,6 +5,10 @@ const UserModel = mongoose.model(
   'users',
   new Schema(
     {
+      username: {
+        type: String,
+        required: true,
+      },
       email: {
         type: String,
         required: true,
