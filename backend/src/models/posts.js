@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { ObjectId } = mongoose.Types;
 const { Schema } = mongoose;
 
 const PostsModel = mongoose.model(
