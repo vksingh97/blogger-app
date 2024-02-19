@@ -25,4 +25,8 @@ router.post('/posts/:postId/like', postController.updatePostLikes);
 
 router.get('/trending-posts', postController.getTrendingPosts);
 
+router.post('/posts/:postId/favourite', postController.updateFavourites);
+
+router.get('/get-favourite-posts/:userId', postController.getUserTrendingPosts);
+
 module.exports = router;

@@ -1,4 +1,5 @@
 const postModel = require('../models/posts');
+const favouriteModel = require('../models/favourite_posts');
 const admin = require('firebase-admin');
 const serviceAccount = require('../../config/firebase-admin-key.json.json');
 const mongoose = require('mongoose');
@@ -111,6 +112,44 @@ module.exports = {
       return { ok: true, data: trendingPosts };
     } catch (error) {
       console.error('Error fetching trending posts:', error);
+      return { ok: false, err: 'An error occurred' };
+    }
+  },
+  updateFavourites: async ({ payload }) => {
+    if (!payload.userId || !payload.postId) {
+      return { ok: false, err: 'Enter userId and postId' };
+    }
+    try {
+      payload.isFavourite
+        ? await favouriteModel.create({
+            insertDict: {
+              userId: new mongoose.Types.ObjectId(payload.userId),
+              postId: new mongoose.Types.ObjectId(payload.postId),
+            },
+          })
+        : await favouriteModel.deleteOne({
+            query: {
+              userId: new mongoose.Types.ObjectId(payload.userId),
+              postId: new mongoose.Types.ObjectId(payload.postId),
+            },
+          });
+
+      return { ok: true, data: payload.postId };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, err: 'An error occurred during updating favourite' };
+    }
+  },
+  getUserTrendingPosts: async ({ userId }) => {
+    try {
+      const resp = await favouriteModel.find({
+        query: { userId: new mongoose.Types.ObjectId(userId) },
+        projection: { postId: 1, _id: 0 },
+      });
+      const postIds = Object.values(resp).map((item) => item.postId.toString());
+      return { ok: true, data: postIds };
+    } catch (error) {
+      console.error(error);
       return { ok: false, err: 'An error occurred' };
     }
   },

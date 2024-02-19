@@ -5,9 +5,10 @@ import {
   LikeOutlined,
   DeleteOutlined,
   LikeTwoTone,
+  StarFilled,
 } from '@ant-design/icons';
 import styled from 'styled-components';
-import { Card, Avatar } from 'antd';
+import { Card, Avatar, Badge } from 'antd'; // Import Badge from Ant Design
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 
@@ -36,7 +37,7 @@ const PostCard = styled(Card)`
   margin-bottom: 20px;
 `;
 
-const AllBlogs = ({ blogPosts, setSelectedPost }) => {
+const AllBlogs = ({ blogPosts, setSelectedPost, favouritePosts }) => {
   const userDetails = useSelector((state) => state.userDetails);
 
   const truncateDescription = (description) => {
@@ -48,13 +49,25 @@ const AllBlogs = ({ blogPosts, setSelectedPost }) => {
   };
 
   const updatePostLike = async ({ postId, like }) => {
-    console.log('inside');
-    const response = await apiInstance.post(`/posts/${postId}/like`, {
-      userId: userDetails.id,
-      like,
-    });
+    try {
+      await apiInstance.post(`/posts/${postId}/like`, {
+        userId: userDetails.id,
+        like,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-    console.log('response', response);
+  const markAsFavourite = async ({ postId, isFavourite }) => {
+    try {
+      await apiInstance.post(`/posts/${postId}/favourite`, {
+        userId: userDetails.id,
+        isFavourite,
+      });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -77,34 +90,69 @@ const AllBlogs = ({ blogPosts, setSelectedPost }) => {
               actions={[
                 item.authorId === userDetails.id ? (
                   <EditOutlined
+                    style={{ fontSize: '20px' }}
                     key='edit'
                     onClick={() => console.log('Edit')}
                   />
-                ) : item.likedBy.includes(userDetails.id) ? (
-                  <LikeTwoTone
-                    key='liked'
-                    onClick={() =>
-                      updatePostLike({
-                        postId: item._id,
-                        like: false,
-                      })
-                    }
-                  />
                 ) : (
-                  <LikeOutlined
-                    key='like'
-                    onClick={() =>
-                      updatePostLike({
-                        postId: item._id,
-                        like: true,
-                      })
-                    }
-                  />
+                  <div>
+                    <Badge count={item.likes} style={{ margin: '0px -20px' }}>
+                      {item && item.likedBy.includes(userDetails.id) ? (
+                        <LikeTwoTone
+                          style={{ fontSize: '20px' }}
+                          key='liked'
+                          onClick={() =>
+                            updatePostLike({
+                              postId: item._id,
+                              like: false,
+                            })
+                          }
+                        />
+                      ) : (
+                        <div>
+                          <LikeOutlined
+                            style={{ fontSize: '20px' }}
+                            key='like'
+                            onClick={() =>
+                              updatePostLike({
+                                postId: item._id,
+                                like: true,
+                              })
+                            }
+                          />
+                        </div>
+                      )}
+                    </Badge>
+                  </div>
                 ),
                 item.authorId === userDetails.id ? (
-                  <DeleteOutlined key='delete' />
+                  <DeleteOutlined style={{ fontSize: '20px' }} key='delete' />
                 ) : (
-                  <StarOutlined key='favourite' />
+                  <div>
+                    {favouritePosts.includes(item._id.toString()) ? (
+                      <StarFilled
+                        style={{ fontSize: '20px', color: '#ffd700' }}
+                        key='favourite'
+                        onClick={() =>
+                          markAsFavourite({
+                            postId: item._id,
+                            isFavourite: false,
+                          })
+                        }
+                      />
+                    ) : (
+                      <StarOutlined
+                        style={{ fontSize: '20px' }}
+                        key='notFavourite'
+                        onClick={() =>
+                          markAsFavourite({
+                            postId: item._id,
+                            isFavourite: true,
+                          })
+                        }
+                      />
+                    )}
+                  </div>
                 ),
               ]}
             >

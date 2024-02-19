@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
@@ -36,24 +37,62 @@ const Body = () => {
   const [createBlog, setCreateBlog] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [currentTab, setCurrentTab] = useState(1);
+  const [trendingPosts, setTrendingPosts] = useState([]);
+  const [favouritePosts, setFavouritePosts] = useState([]);
+  const [favouriteBlogList, setFavouriteBlogList] = useState([]);
 
   const userDetails = useSelector((state) => state.userDetails);
 
   const getAllPosts = async () => {
     try {
       const posts = await apiInstance.get('/get-posts');
+      getFavouritePostIds(userDetails.id);
       setBlogPosts(posts.data.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    getAllPosts();
-  }, []);
+  const fetchTrendingData = async () => {
+    try {
+      const response = await apiInstance.get('/trending-posts');
+      setTrendingPosts(response.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getFavouritePostIds = async (userId) => {
+    try {
+      const response = await apiInstance.get(`/get-favourite-posts/${userId}`);
+      setFavouritePosts(response.data.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
-    console.log(currentTab);
+    getAllPosts();
+  }, [userDetails]);
+
+  useEffect(() => {
+    if (favouritePosts.length) {
+      const favourite = blogPosts
+        .map((item) => {
+          if (favouritePosts.includes(item._id.toString())) {
+            return item;
+          }
+          return null;
+        })
+        .filter((ele) => ele);
+      setFavouriteBlogList(favourite);
+    }
+  }, [favouritePosts, blogPosts]);
+
+  useEffect(() => {
+    if (currentTab === 2) {
+      fetchTrendingData();
+    }
   }, [currentTab]);
 
   useEffect(() => {
@@ -78,11 +117,33 @@ const Body = () => {
         </Tabs>
       </TabsContainer>
       <BodyContainer>
-        {currentTab === 1 && (
-          <AllBlogs blogPosts={blogPosts} setSelectedPost={setSelectedPost} />
+        {blogPosts.length > 0 && currentTab === 1 && (
+          <AllBlogs
+            blogPosts={blogPosts}
+            setSelectedPost={setSelectedPost}
+            favouritePosts={favouritePosts}
+          />
         )}
-        {currentTab === 4 && (
-          <AllBlogs blogPosts={userBlogs} setSelectedPost={setSelectedPost} />
+        {trendingPosts.length > 0 && currentTab === 2 && (
+          <AllBlogs
+            blogPosts={trendingPosts}
+            setSelectedPost={setSelectedPost}
+            favouritePosts={favouritePosts}
+          />
+        )}
+        {favouritePosts.length > 0 && currentTab === 3 && (
+          <AllBlogs
+            blogPosts={favouriteBlogList}
+            setSelectedPost={setSelectedPost}
+            favouritePosts={favouritePosts}
+          />
+        )}
+        {userBlogs.length > 0 && currentTab === 4 && (
+          <AllBlogs
+            blogPosts={userBlogs}
+            setSelectedPost={setSelectedPost}
+            favouritePosts={favouritePosts}
+          />
         )}
       </BodyContainer>
       <FloatButton
