@@ -23,4 +23,6 @@ router.post('/login', userController.loginUser);
 
 router.post('/posts/:postId/like', postController.updatePostLikes);
 
+router.get('/trending-posts', postController.getTrendingPosts);
+
 module.exports = router;

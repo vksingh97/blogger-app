@@ -2,6 +2,7 @@ const postModel = require('../models/posts');
 const admin = require('firebase-admin');
 const serviceAccount = require('../../config/firebase-admin-key.json.json');
 const mongoose = require('mongoose');
+const redisClient = require('../redisClient');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -22,7 +23,6 @@ module.exports = {
     }
   },
   createBlog: async ({ payload }) => {
-    // Verify that the path property is set in the payload.file object
     if (!payload.file || !payload.file.buffer) {
       return { ok: false, err: 'File path is missing or undefined' };
     }
@@ -30,7 +30,6 @@ module.exports = {
     try {
       const file = bucket.file(`post-media/${payload.file.originalname}`);
 
-      // Create a write stream to upload the file
       const fileStream = file.createWriteStream({
         metadata: {
           contentType: payload.file.mimetype,
@@ -38,20 +37,16 @@ module.exports = {
         resumable: false,
       });
 
-      // Write the file buffer to the write stream
       fileStream.end(payload.file.buffer);
 
-      // Wait for the upload to finish
       await new Promise((resolve, reject) => {
         fileStream.on('finish', async () => {
-          // Set the file ACL to public-read
           await file.makePublic();
           resolve();
         });
         fileStream.on('error', reject);
       });
 
-      // Once the file is uploaded, you can get the URL and other details if needed
       const fileUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
       console.log('File URL:', fileUrl);
 
@@ -95,6 +90,28 @@ module.exports = {
     } catch (error) {
       console.error(error);
       return { ok: false, err: 'An error occurred during updating likes' };
+    }
+  },
+  getTrendingPosts: async ({}) => {
+    try {
+      const cachedData = await redisClient.get('trending_posts');
+      if (cachedData) {
+        console.log('Retrieved trending posts from Redis cache');
+        return { ok: true, data: JSON.parse(cachedData) };
+      }
+
+      const trendingPosts = await postModel.getTrendingPosts({});
+      const TTL = 3600;
+      await redisClient.setex(
+        'trending_posts',
+        TTL,
+        JSON.stringify(trendingPosts)
+      );
+
+      return { ok: true, data: trendingPosts };
+    } catch (error) {
+      console.error('Error fetching trending posts:', error);
+      return { ok: false, err: 'An error occurred' };
     }
   },
 };

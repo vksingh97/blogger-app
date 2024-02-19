@@ -1,11 +1,11 @@
-const posts = require('../services/posts');
+const postService = require('../services/posts');
 
 module.exports = {
   // Controller function for retrieving all posts
   getAllPosts: async (req, res) => {
     try {
       // Call the service function to get all posts
-      const response = await posts.getAllPosts({});
+      const response = await postService.getAllPosts({});
 
       if (response.ok) {
         return res.success({ data: response.data });
@@ -24,7 +24,7 @@ module.exports = {
       const file = req.file;
       const payload = { file, ...bodyData };
       // Call the service function to create a new blog post
-      const response = await posts.createBlog({ payload });
+      const response = await postService.createBlog({ payload });
 
       if (response.ok) {
         return res.success({ data: response.data });
@@ -44,13 +44,25 @@ module.exports = {
 
       const payload = { userId, postId, like };
 
-      const response = await posts.updatePostLikes({ payload });
+      const response = await postService.updatePostLikes({ payload });
       if (response.ok) {
         return res.success({ data: response.data });
       } else {
         return res.failure({ msg: response.err });
       }
     } catch (e) {
+      return res.failure({});
+    }
+  },
+  getTrendingPosts: async (req, res) => {
+    try {
+      const response = await postService.getTrendingPosts({});
+      if (response.ok) {
+        return res.success({ data: response.data });
+      } else {
+        return res.failure({ msg: response.err });
+      }
+    } catch (error) {
       return res.failure({});
     }
   },

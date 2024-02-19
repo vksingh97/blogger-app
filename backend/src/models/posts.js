@@ -50,4 +50,21 @@ module.exports = {
     return posts;
   },
   insertMany: async ({ insertDict }) => PostsModel.insertMany(insertDict),
+  getTrendingPosts: async ({}) =>
+    PostsModel.aggregate([
+      {
+        $match: {
+          systemIsDeleted: false,
+        },
+      },
+      {
+        $sort: {
+          likes: -1,
+          systemCreatedAt: -1,
+        },
+      },
+      {
+        $limit: 20,
+      },
+    ]),
 };
