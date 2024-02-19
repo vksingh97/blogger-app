@@ -6,6 +6,7 @@ import { Tabs, Modal, FloatButton } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import CreateBlog from './CreateBlog';
 import AllBlogs from './AllBlogs';
+import { useSelector } from 'react-redux';
 
 const { TabPane } = Tabs;
 
@@ -26,8 +27,11 @@ const apiInstance = axios.create({
 
 const Body = () => {
   const [blogPosts, setBlogPosts] = useState([]);
+  const [userBlogs, setUserBlogs] = useState([]);
   const [createBlog, setCreateBlog] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+
+  const userDetails = useSelector((state) => state.userDetails);
 
   const getAllPosts = async () => {
     await apiInstance
@@ -38,6 +42,17 @@ const Body = () => {
       })
       .catch((err) => console.log(err));
   };
+
+  useEffect(() => {
+    const userPosts = blogPosts
+      .map((item) => {
+        if (item.authorId === userDetails.id) {
+          return item;
+        }
+      })
+      .filter((ele) => ele);
+    setUserBlogs(userPosts);
+  }, [blogPosts]);
 
   useEffect(() => {
     getAllPosts();
@@ -54,6 +69,9 @@ const Body = () => {
         </TabPane>
         <TabPane tab='Favorite' key='3'>
           {/* Favorite posts content */}
+        </TabPane>
+        <TabPane tab='My Posts' key='4'>
+          <AllBlogs blogPosts={userBlogs} setSelectedPost={setSelectedPost} />
         </TabPane>
       </Tabs>
 

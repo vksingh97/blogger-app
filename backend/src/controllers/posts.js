@@ -35,4 +35,23 @@ module.exports = {
       return res.failure({});
     }
   },
+  updatePostLikes: async (req, res) => {
+    try {
+      const {
+        body: { userId, like },
+      } = req;
+      const { postId } = req.params;
+
+      const payload = { userId, postId, like };
+
+      const response = await posts.updatePostLikes({ payload });
+      if (response.ok) {
+        return res.success({ data: response.data });
+      } else {
+        return res.failure({ msg: response.err });
+      }
+    } catch (e) {
+      return res.failure({});
+    }
+  },
 };

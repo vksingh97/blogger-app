@@ -1,6 +1,7 @@
 const postModel = require('../models/posts');
 const admin = require('firebase-admin');
-const serviceAccount = require('../../config/firebase-admin-key.json.json'); // Replace with the path to your service account key file
+const serviceAccount = require('../../config/firebase-admin-key.json.json');
+const mongoose = require('mongoose');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -21,22 +22,18 @@ module.exports = {
     }
   },
   createBlog: async ({ payload }) => {
-    console.log(payload);
     // Verify that the path property is set in the payload.file object
     if (!payload.file || !payload.file.buffer) {
       return { ok: false, err: 'File path is missing or undefined' };
     }
 
     try {
-      const file = bucket.file(`uploads/${payload.file.originalname}`);
+      const file = bucket.file(`post-media/${payload.file.originalname}`);
 
       // Create a write stream to upload the file
       const fileStream = file.createWriteStream({
         metadata: {
           contentType: payload.file.mimetype,
-          metadata: {
-            postId: 'your-post-id',
-          },
         },
         resumable: false,
       });
@@ -72,6 +69,32 @@ module.exports = {
     } catch (error) {
       console.error(error);
       return { ok: false, err: 'An error occurred during file upload' };
+    }
+  },
+  updatePostLikes: async ({ payload }) => {
+    if (!payload.userId || !payload.postId) {
+      return { ok: false, err: 'Enter userId and postId' };
+    }
+    try {
+      const updateQuery = payload.like
+        ? {
+            $addToSet: { likedBy: new mongoose.Types.ObjectId(payload.userId) },
+            $inc: { likes: 1 },
+          }
+        : {
+            $pull: { likedBy: new mongoose.Types.ObjectId(payload.userId) },
+            $inc: { likes: -1 },
+          };
+
+      await postModel.updateOne({
+        query: { _id: new mongoose.Types.ObjectId(payload.postId) },
+        updateDict: updateQuery,
+      });
+
+      return { ok: true, data: payload.postId };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, err: 'An error occurred during updating likes' };
     }
   },
 };

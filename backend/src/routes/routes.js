@@ -21,4 +21,6 @@ router.post('/register', userController.registerUser);
 
 router.post('/login', userController.loginUser);
 
+router.post('/posts/:postId/like', postController.updatePostLikes);
+
 module.exports = router;
