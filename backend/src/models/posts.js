@@ -49,4 +49,5 @@ module.exports = {
       .lean();
     return posts;
   },
+  insertMany: async ({ insertDict }) => PostsModel.insertMany(insertDict),
 };

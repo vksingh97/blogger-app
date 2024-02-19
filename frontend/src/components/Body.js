@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
@@ -14,11 +13,17 @@ const PostImage = styled.img`
   width: 100%;
 `;
 
+const TabsContainer = styled.div`
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 1;
+`;
+
 const BodyContainer = styled.div`
-  height: 90%;
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
 `;
 
 const apiInstance = axios.create({
@@ -30,59 +35,64 @@ const Body = () => {
   const [userBlogs, setUserBlogs] = useState([]);
   const [createBlog, setCreateBlog] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [currentTab, setCurrentTab] = useState(1);
 
   const userDetails = useSelector((state) => state.userDetails);
 
   const getAllPosts = async () => {
-    await apiInstance
-      .get('/get-posts')
-      .then((posts) => {
-        console.log(posts);
-        setBlogPosts(posts.data.data);
-      })
-      .catch((err) => console.log(err));
+    try {
+      const posts = await apiInstance.get('/get-posts');
+      setBlogPosts(posts.data.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
-    const userPosts = blogPosts
-      .map((item) => {
-        if (item.authorId === userDetails.id) {
-          return item;
-        }
-      })
-      .filter((ele) => ele);
-    setUserBlogs(userPosts);
-  }, [blogPosts]);
+    getAllPosts();
+  }, []);
 
   useEffect(() => {
-    getAllPosts();
-  }, [apiInstance]);
+    console.log(currentTab);
+  }, [currentTab]);
+
+  useEffect(() => {
+    const userPosts = blogPosts.filter(
+      (item) => item.authorId === userDetails.id
+    );
+    setUserBlogs(userPosts);
+  }, [blogPosts, userDetails.id]);
 
   return (
-    <BodyContainer>
-      <Tabs defaultActiveKey='1' centered>
-        <TabPane tab='All Posts' key='1'>
+    <>
+      <TabsContainer>
+        <Tabs
+          defaultActiveKey='1'
+          centered
+          onChange={(key) => setCurrentTab(parseInt(key))}
+        >
+          <TabPane tab='All Posts' key='1' />
+          <TabPane tab='Trending' key='2' />
+          <TabPane tab='Favorite' key='3' />
+          <TabPane tab='My Posts' key='4' />
+        </Tabs>
+      </TabsContainer>
+      <BodyContainer>
+        {currentTab === 1 && (
           <AllBlogs blogPosts={blogPosts} setSelectedPost={setSelectedPost} />
-        </TabPane>
-        <TabPane tab='Trending' key='2'>
-          {/* Trending posts content */}
-        </TabPane>
-        <TabPane tab='Favorite' key='3'>
-          {/* Favorite posts content */}
-        </TabPane>
-        <TabPane tab='My Posts' key='4'>
+        )}
+        {currentTab === 4 && (
           <AllBlogs blogPosts={userBlogs} setSelectedPost={setSelectedPost} />
-        </TabPane>
-      </Tabs>
-
+        )}
+      </BodyContainer>
       <FloatButton
         icon={<PlusOutlined />}
         tooltip={<div>Create Blog</div>}
         onClick={() => setCreateBlog(true)}
       />
       <Modal
-        title='Basic Modal'
-        open={createBlog}
+        title='Create Blog'
+        visible={createBlog}
         onOk={() => setCreateBlog(false)}
         onCancel={() => setCreateBlog(false)}
       >
@@ -97,18 +107,14 @@ const Body = () => {
         {selectedPost && (
           <>
             <PostImage
-              src={
-                selectedPost.imageUrl
-                  ? selectedPost.imageUrl
-                  : 'https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png'
-              }
+              src={selectedPost.imageUrl || 'https://via.placeholder.com/150'}
               alt={selectedPost.title}
             />
             <div dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
           </>
         )}
       </Modal>
-    </BodyContainer>
+    </>
   );
 };
 
