@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import styled from 'styled-components';
-import { Tabs, Modal, FloatButton } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import styled from 'styled-components'; // Import keyframes and css
+import { Tabs, Modal, FloatButton, Typography, Tooltip } from 'antd';
+import { PlusOutlined, OpenAIOutlined, OpenAIFilled } from '@ant-design/icons';
 import CreateBlog from './CreateBlog';
 import AllBlogs from './AllBlogs';
 import { useSelector } from 'react-redux';
@@ -27,6 +27,10 @@ const BodyContainer = styled.div`
   padding: 20px;
 `;
 
+const ModalContent = styled.div`
+  padding: 20px;
+`;
+
 const apiInstance = axios.create({
   baseURL: 'http://localhost:6001/',
 });
@@ -40,14 +44,18 @@ const Body = () => {
   const [trendingPosts, setTrendingPosts] = useState([]);
   const [favouritePosts, setFavouritePosts] = useState([]);
   const [favouriteBlogList, setFavouriteBlogList] = useState([]);
+  const [userLikedPost, setUserLikedPost] = useState([]);
+  const [summarize, setSummarize] = useState(false);
+  const [postSummary, setPostSummary] = useState('');
+  const [modalTab, setModalTab] = useState('1');
 
   const userDetails = useSelector((state) => state.userDetails);
 
   const getAllPosts = async () => {
     try {
       const posts = await apiInstance.get('/get-posts');
-      getFavouritePostIds(userDetails.id);
       setBlogPosts(posts.data.data);
+      getFavouritePostIds(userDetails.id);
     } catch (error) {
       console.log(error);
     }
@@ -70,6 +78,16 @@ const Body = () => {
       console.log(e);
     }
   };
+  const getSummary = async () => {
+    try {
+      const response = await apiInstance.post('/summarise', {
+        postContent: selectedPost.content,
+      });
+      setPostSummary(response.data.data.promptResponse);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
     getAllPosts();
@@ -87,6 +105,15 @@ const Body = () => {
         .filter((ele) => ele);
       setFavouriteBlogList(favourite);
     }
+    const liked = blogPosts
+      .map((item) => {
+        if (item.likedBy.includes(userDetails.id)) {
+          return item._id;
+        }
+        return null;
+      })
+      .filter((ele) => ele);
+    setUserLikedPost(liked);
   }, [favouritePosts, blogPosts]);
 
   useEffect(() => {
@@ -101,6 +128,12 @@ const Body = () => {
     );
     setUserBlogs(userPosts);
   }, [blogPosts, userDetails.id]);
+
+  useEffect(() => {
+    if (summarize === true) {
+      getSummary();
+    }
+  }, [summarize]);
 
   return (
     <>
@@ -121,28 +154,52 @@ const Body = () => {
           <AllBlogs
             blogPosts={blogPosts}
             setSelectedPost={setSelectedPost}
+            selectedPost={selectedPost}
             favouritePosts={favouritePosts}
+            setUserLikedPost={setUserLikedPost}
+            userLikedPost={userLikedPost}
+            setFavouritePosts={setFavouritePosts}
+            summarize={summarize}
+            setSummarize={setSummarize}
           />
         )}
         {trendingPosts.length > 0 && currentTab === 2 && (
           <AllBlogs
             blogPosts={trendingPosts}
             setSelectedPost={setSelectedPost}
+            selectedPost={selectedPost}
             favouritePosts={favouritePosts}
+            setUserLikedPost={setUserLikedPost}
+            userLikedPost={userLikedPost}
+            setFavouritePosts={setFavouritePosts}
+            summarize={summarize}
+            setSummarize={setSummarize}
           />
         )}
         {favouritePosts.length > 0 && currentTab === 3 && (
           <AllBlogs
             blogPosts={favouriteBlogList}
+            selectedPost={selectedPost}
             setSelectedPost={setSelectedPost}
             favouritePosts={favouritePosts}
+            setUserLikedPost={setUserLikedPost}
+            userLikedPost={userLikedPost}
+            setFavouritePosts={setFavouritePosts}
+            summarize={summarize}
+            setSummarize={setSummarize}
           />
         )}
         {userBlogs.length > 0 && currentTab === 4 && (
           <AllBlogs
             blogPosts={userBlogs}
             setSelectedPost={setSelectedPost}
+            selectedPost={selectedPost}
             favouritePosts={favouritePosts}
+            setUserLikedPost={setUserLikedPost}
+            userLikedPost={userLikedPost}
+            setFavouritePosts={setFavouritePosts}
+            summarize={summarize}
+            setSummarize={setSummarize}
           />
         )}
       </BodyContainer>
@@ -155,26 +212,83 @@ const Body = () => {
         title='Create Blog'
         visible={createBlog}
         onOk={() => setCreateBlog(false)}
-        onCancel={() => setCreateBlog(false)}
+        onCancel={() => {
+          setCreateBlog(false);
+        }}
       >
         <CreateBlog />
       </Modal>
-      <Modal
-        title={selectedPost ? selectedPost.title : ''}
-        visible={selectedPost !== null}
-        onCancel={() => setSelectedPost(null)}
-        footer={null}
-      >
-        {selectedPost && (
-          <>
+      {selectedPost && (
+        <Modal
+          title={
+            <div style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+              {postSummary !== '' ? (
+                <Tabs
+                  defaultActiveKey='1'
+                  activeKey={modalTab}
+                  onChange={(key) => setModalTab(key)}
+                >
+                  <Tabs.TabPane tab='View Post' key='1'></Tabs.TabPane>
+                  <Tabs.TabPane tab='View Summary' key='2'></Tabs.TabPane>
+                </Tabs>
+              ) : !summarize ? (
+                <div style={{ display: 'flex' }}>
+                  <Tooltip title='Summarize this post'>
+                    <OpenAIOutlined
+                      onClick={() => setSummarize(true)}
+                      style={{
+                        fontSize: '30px',
+                        margin: '0px 0px 0px 5px',
+                        cursor: 'pointer',
+                      }}
+                    />
+                  </Tooltip>
+                </div>
+              ) : (
+                summarize &&
+                postSummary === '' && (
+                  <div>
+                    <Tooltip title='Summarizing'>
+                      <OpenAIFilled
+                        spin
+                        color='#0f52b4'
+                        style={{
+                          fontSize: '30px',
+                          margin: '0px 0px 0px 5px',
+                          cursor: 'pointer',
+                        }}
+                      />
+                    </Tooltip>
+                  </div>
+                )
+              )}
+            </div>
+          }
+          visible={selectedPost !== null}
+          onCancel={() => {
+            setSummarize(false);
+            setSelectedPost(null);
+            setSummarize(false);
+            setPostSummary('');
+          }}
+          footer={null}
+        >
+          <Typography.Title level={3} style={{ textAlign: 'center' }}>
+            {selectedPost ? selectedPost.title : ''}
+          </Typography.Title>
+          <ModalContent>
             <PostImage
               src={selectedPost.imageUrl || 'https://via.placeholder.com/150'}
               alt={selectedPost.title}
             />
-            <div dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
-          </>
-        )}
-      </Modal>
+            {!summarize || modalTab === '1' ? (
+              <div dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
+            ) : (
+              <div>{postSummary}</div>
+            )}
+          </ModalContent>
+        </Modal>
+      )}
     </>
   );
 };

@@ -4,6 +4,7 @@ const admin = require('firebase-admin');
 const serviceAccount = require('../../config/firebase-admin-key.json.json');
 const mongoose = require('mongoose');
 const redisClient = require('../redisClient');
+const { chatGptCompletionApi } = require('../utils/apiDict');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -150,6 +151,25 @@ module.exports = {
       return { ok: true, data: postIds };
     } catch (error) {
       console.error(error);
+      return { ok: false, err: 'An error occurred' };
+    }
+  },
+  getPostSummary: async ({ postContent }) => {
+    try {
+      const [openaiResponse] = await Promise.all([
+        chatGptCompletionApi({ prompt: postContent, model: 'gpt-3.5-turbo' }),
+      ]);
+
+      if (openaiResponse && openaiResponse.data) {
+        return {
+          ok: true,
+          data: {
+            promptResponse: openaiResponse.data.choices[0].message.content,
+          },
+        };
+      }
+    } catch (error) {
+      console.error('Error summarizing content:', error.request.data);
       return { ok: false, err: 'An error occurred' };
     }
   },

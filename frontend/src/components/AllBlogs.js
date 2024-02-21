@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EditOutlined,
   StarOutlined,
@@ -37,7 +37,17 @@ const PostCard = styled(Card)`
   margin-bottom: 20px;
 `;
 
-const AllBlogs = ({ blogPosts, setSelectedPost, favouritePosts }) => {
+const AllBlogs = ({
+  blogPosts,
+  setSelectedPost,
+  favouritePosts,
+  setUserLikedPost,
+  userLikedPost,
+  setFavouritePosts,
+  summarize,
+  setSummarize,
+  selectedPost,
+}) => {
   const userDetails = useSelector((state) => state.userDetails);
 
   const truncateDescription = (description) => {
@@ -49,6 +59,11 @@ const AllBlogs = ({ blogPosts, setSelectedPost, favouritePosts }) => {
   };
 
   const updatePostLike = async ({ postId, like }) => {
+    if (like) {
+      setUserLikedPost([...userLikedPost, postId]);
+    } else {
+      setUserLikedPost(userLikedPost.filter((id) => id !== postId));
+    }
     try {
       await apiInstance.post(`/posts/${postId}/like`, {
         userId: userDetails.id,
@@ -60,6 +75,11 @@ const AllBlogs = ({ blogPosts, setSelectedPost, favouritePosts }) => {
   };
 
   const markAsFavourite = async ({ postId, isFavourite }) => {
+    if (isFavourite) {
+      setFavouritePosts([...favouritePosts, postId]);
+    } else {
+      setFavouritePosts(favouritePosts.filter((id) => id !== postId));
+    }
     try {
       await apiInstance.post(`/posts/${postId}/favourite`, {
         userId: userDetails.id,
@@ -97,28 +117,28 @@ const AllBlogs = ({ blogPosts, setSelectedPost, favouritePosts }) => {
                 ) : (
                   <div>
                     <Badge count={item.likes} style={{ margin: '0px -20px' }}>
-                      {item && item.likedBy.includes(userDetails.id) ? (
+                      {item && userLikedPost.includes(item._id) ? (
                         <LikeTwoTone
                           style={{ fontSize: '20px' }}
                           key='liked'
-                          onClick={() =>
+                          onClick={() => {
                             updatePostLike({
                               postId: item._id,
                               like: false,
-                            })
-                          }
+                            });
+                          }}
                         />
                       ) : (
                         <div>
                           <LikeOutlined
                             style={{ fontSize: '20px' }}
                             key='like'
-                            onClick={() =>
+                            onClick={() => {
                               updatePostLike({
                                 postId: item._id,
                                 like: true,
-                              })
-                            }
+                              });
+                            }}
                           />
                         </div>
                       )}

@@ -2,6 +2,14 @@ const router = require('express').Router();
 const postController = require('../controllers/posts');
 const userController = require('../controllers/users');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
+
+// Define rate limit options
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute window
+  max: 10, // limit each IP to 10 requests per windowMs
+  message: 'Too many requests from this IP, please try again later',
+});
 
 const storage = multer.memoryStorage();
 
@@ -28,5 +36,7 @@ router.get('/trending-posts', postController.getTrendingPosts);
 router.post('/posts/:postId/favourite', postController.updateFavourites);
 
 router.get('/get-favourite-posts/:userId', postController.getUserTrendingPosts);
+
+router.post('/summarise', limiter, postController.getPostSummary);
 
 module.exports = router;

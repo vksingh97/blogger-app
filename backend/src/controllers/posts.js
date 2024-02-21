@@ -106,4 +106,19 @@ module.exports = {
       return res.failure({});
     }
   },
+  getPostSummary: async (req, res) => {
+    const {
+      body: { postContent },
+    } = req;
+    try {
+      const response = await postService.getPostSummary({ postContent });
+      if (response.ok) {
+        return res.success({ data: response.data });
+      } else {
+        return res.failure({ msg: response.err });
+      }
+    } catch (e) {
+      return res.failure({});
+    }
+  },
 };
