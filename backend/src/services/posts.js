@@ -68,6 +68,48 @@ module.exports = {
       return { ok: false, err: 'An error occurred during file upload' };
     }
   },
+  editBlog: async ({ payload }) => {
+    if (!payload.file || !payload.file.buffer) {
+      return { ok: false, err: 'File path is missing or undefined' };
+    }
+    try {
+      const file = bucket.file(`post-media/${payload.file.originalname}`);
+      const fileStream = file.createWriteStream({
+        metadata: {
+          contentType: payload.file.mimetype,
+        },
+        resumable: false,
+      });
+
+      fileStream.end(payload.file.buffer);
+
+      await new Promise((resolve, reject) => {
+        fileStream.on('finish', async () => {
+          await file.makePublic();
+          resolve();
+        });
+        fileStream.on('error', reject);
+      });
+
+      const fileUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+      console.log('File URL:', fileUrl);
+
+      await postModel.updateOne({
+        query: { _id: new mongoose.Types.ObjectId(payload.postId) },
+        updateDict: {
+          title: payload.title,
+          content: payload.content,
+          imageUrl: fileUrl,
+          authorId: payload.authorId,
+          author: payload.author,
+        },
+      });
+      return { ok: true };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, err: 'Error editing post' };
+    }
+  },
   updatePostLikes: async ({ payload }) => {
     if (!payload.userId || !payload.postId) {
       return { ok: false, err: 'Enter userId and postId' };
@@ -171,6 +213,27 @@ module.exports = {
     } catch (error) {
       console.error('Error summarizing content:', error.request.data);
       return { ok: false, err: 'An error occurred' };
+    }
+  },
+  deletePost: async ({ postId }) => {
+    if (!postId) {
+      return { ok: false, err: 'Invalid post Id' };
+    }
+    try {
+      const response = await postModel.updateOne({
+        query: {
+          _id: new mongoose.Types.ObjectId(postId),
+        },
+        updateDict: {
+          systemIsDeleted: true,
+        },
+      });
+      if (response && response.acknowledged) {
+        return { ok: true };
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error.request.data);
+      return { ok: false, err: 'Error deleting post' };
     }
   },
 };

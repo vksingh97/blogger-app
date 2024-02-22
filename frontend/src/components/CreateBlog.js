@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, Upload } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import 'react-quill/dist/quill.snow.css'; // Import Quill styles
@@ -24,13 +24,18 @@ const apiInstance = axios.create({
   baseURL: 'http://localhost:6001/',
 });
 
-const CreateBlog = () => {
-  const [description, setDescription] = useState('');
+const CreateBlog = ({
+  onClose,
+  selectedPost,
+  setEditPost,
+  editPost,
+  selectedEditingPost,
+  description,
+  handleChangeDescription,
+}) => {
+  console.log(selectedPost);
   const userDetails = useSelector((state) => state.userDetails);
 
-  const handleChangeDescription = (value) => {
-    setDescription(value);
-  };
   const modules = {
     toolbar: [
       [{ header: '1' }, { header: '2' }, { font: [] }],
@@ -75,15 +80,36 @@ const CreateBlog = () => {
       formData.append('file', values.upload[0].originFileObj);
     }
 
-    const response = await apiInstance.post('/create-blog', formData);
-    console.log(response);
+    if (!editPost) {
+      console.log('1', formData);
+      await apiInstance.post('/create-blog', formData);
+    } else {
+      console.log('2', selectedEditingPost, formData);
+      await apiInstance.put(`/edit-post/${selectedEditingPost._id}`, formData);
+    }
+    setEditPost(null);
+    onClose();
   };
+
+  useEffect(() => {
+    console.log(editPost);
+  }, [editPost]);
 
   return (
     <Form
       name='basic'
-      initialValues={{ remember: true }}
-      onFinish={onFinish}
+      initialValues={
+        editPost && {
+          title: selectedEditingPost.title,
+          description: selectedEditingPost.content,
+        }
+          ? {
+              title: selectedEditingPost.title,
+              description: selectedEditingPost.content,
+            }
+          : {}
+      }
+      onFinish={(e) => onFinish(e, editPost)}
       layout='vertical'
     >
       <Form.Item

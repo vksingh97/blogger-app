@@ -44,12 +44,15 @@ module.exports = {
     PostsModel.updateMany(query, updateDict),
 
   getAllPosts: async ({}) => {
-    const posts = await PostsModel.find({})
+    const posts = await PostsModel.find({
+      systemIsDeleted: false,
+    })
       .sort({ systemCreatedAt: -1 })
       .lean();
     return posts;
   },
   insertMany: async ({ insertDict }) => PostsModel.insertMany(insertDict),
+
   getTrendingPosts: async ({}) =>
     PostsModel.aggregate([
       {

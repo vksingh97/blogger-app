@@ -1,5 +1,6 @@
 const userModel = require('../models/users');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 module.exports = {
   registerUser: async ({ payload }) => {
@@ -32,7 +33,7 @@ module.exports = {
       return { ok: false, err: 'An error occurred' };
     }
   },
-  loginUser: async ({ payload }) => {
+  loginUser: async ({ payload, res }) => {
     if (!(payload.email && payload.password)) {
       return { ok: false, err: 'Enter  all fields' };
     }
@@ -50,6 +51,23 @@ module.exports = {
         Object.values(resp).length &&
         (await bcrypt.compare(payload.password, resp.password))
       ) {
+        const token = jwt.sign(
+          {
+            username: resp.username,
+            email: resp.email,
+            id: resp._id.toString(),
+          },
+          process.env.JWT_SECRET_KEY,
+          {
+            expiresIn: '1h',
+          }
+        );
+        console.log(token);
+        res.cookie('authToken', token, {
+          httpOnly: true,
+        });
+        console.log(res);
+
         return {
           ok: true,
           data: {

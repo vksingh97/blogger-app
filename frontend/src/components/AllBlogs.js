@@ -47,6 +47,10 @@ const AllBlogs = ({
   summarize,
   setSummarize,
   selectedPost,
+  editPost,
+  setEditPost,
+  setSelectedEditingPost,
+  selectedEditingPost,
 }) => {
   const userDetails = useSelector((state) => state.userDetails);
 
@@ -90,6 +94,14 @@ const AllBlogs = ({
     }
   };
 
+  const deletePost = async ({ postId }) => {
+    try {
+      await apiInstance.delete(`/delete-post/${postId}`);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <div>
       <BlogPosts>
@@ -112,7 +124,10 @@ const AllBlogs = ({
                   <EditOutlined
                     style={{ fontSize: '20px' }}
                     key='edit'
-                    onClick={() => console.log('Edit')}
+                    onClick={() => {
+                      setEditPost(true);
+                      setSelectedEditingPost(item);
+                    }}
                   />
                 ) : (
                   <div>
@@ -146,7 +161,11 @@ const AllBlogs = ({
                   </div>
                 ),
                 item.authorId === userDetails.id ? (
-                  <DeleteOutlined style={{ fontSize: '20px' }} key='delete' />
+                  <DeleteOutlined
+                    style={{ fontSize: '20px' }}
+                    key='delete'
+                    onClick={() => deletePost({ postId: item._id })}
+                  />
                 ) : (
                   <div>
                     {favouritePosts.includes(item._id.toString()) ? (

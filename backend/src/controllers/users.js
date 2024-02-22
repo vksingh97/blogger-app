@@ -20,7 +20,7 @@ module.exports = {
     try {
       const { body: payload } = req;
       // Call the service function to get all posts
-      const response = await userService.loginUser({ payload });
+      const response = await userService.loginUser({ payload, res });
 
       if (response.ok) {
         return res.success({ data: response.data });

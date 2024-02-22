@@ -19,12 +19,31 @@ module.exports = {
 
   // Controller function for creating a new blog post
   createBlog: async (req, res) => {
+    const { body: bodyData } = req;
+    const file = req.file;
+    const payload = { file, ...bodyData };
     try {
-      const { body: bodyData } = req;
-      const file = req.file;
-      const payload = { file, ...bodyData };
       // Call the service function to create a new blog post
       const response = await postService.createBlog({ payload });
+
+      if (response.ok) {
+        return res.success({ data: response.data });
+      } else {
+        return res.failure({ msg: response.err });
+      }
+    } catch (e) {
+      return res.failure({});
+    }
+  },
+  editBlog: async (req, res) => {
+    const { body: bodyData, params: postId } = req;
+    const file = req.file;
+
+    const payload = { file, postId: postId.postId, ...bodyData };
+    console.log(payload);
+    try {
+      // Call the service function to create a new blog post
+      const response = await postService.editBlog({ payload });
 
       if (response.ok) {
         return res.success({ data: response.data });
@@ -112,6 +131,19 @@ module.exports = {
     } = req;
     try {
       const response = await postService.getPostSummary({ postContent });
+      if (response.ok) {
+        return res.success({ data: response.data });
+      } else {
+        return res.failure({ msg: response.err });
+      }
+    } catch (e) {
+      return res.failure({});
+    }
+  },
+  deletePost: async (req, res) => {
+    const { postId } = req.params;
+    try {
+      const response = await postService.deletePost({ postId });
       if (response.ok) {
         return res.success({ data: response.data });
       } else {

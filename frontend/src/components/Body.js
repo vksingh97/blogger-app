@@ -48,6 +48,13 @@ const Body = () => {
   const [summarize, setSummarize] = useState(false);
   const [postSummary, setPostSummary] = useState('');
   const [modalTab, setModalTab] = useState('1');
+  const [editPost, setEditPost] = useState(false);
+  const [selectedEditingPost, setSelectedEditingPost] = useState(null);
+  const [description, setDescription] = useState('');
+
+  const handleChangeDescription = (value) => {
+    setDescription(value);
+  };
 
   const userDetails = useSelector((state) => state.userDetails);
 
@@ -161,6 +168,10 @@ const Body = () => {
             setFavouritePosts={setFavouritePosts}
             summarize={summarize}
             setSummarize={setSummarize}
+            editPost={editPost}
+            setEditPost={setEditPost}
+            setSelectedEditingPost={setSelectedEditingPost}
+            selectedEditingPost={selectedEditingPost}
           />
         )}
         {trendingPosts.length > 0 && currentTab === 2 && (
@@ -174,6 +185,10 @@ const Body = () => {
             setFavouritePosts={setFavouritePosts}
             summarize={summarize}
             setSummarize={setSummarize}
+            editPost={editPost}
+            setEditPost={setEditPost}
+            setSelectedEditingPost={setSelectedEditingPost}
+            selectedEditingPost={selectedEditingPost}
           />
         )}
         {favouritePosts.length > 0 && currentTab === 3 && (
@@ -187,6 +202,10 @@ const Body = () => {
             setFavouritePosts={setFavouritePosts}
             summarize={summarize}
             setSummarize={setSummarize}
+            editPost={editPost}
+            setEditPost={setEditPost}
+            setSelectedEditingPost={setSelectedEditingPost}
+            selectedEditingPost={selectedEditingPost}
           />
         )}
         {userBlogs.length > 0 && currentTab === 4 && (
@@ -200,23 +219,44 @@ const Body = () => {
             setFavouritePosts={setFavouritePosts}
             summarize={summarize}
             setSummarize={setSummarize}
+            editPost={editPost}
+            setEditPost={setEditPost}
+            setSelectedEditingPost={setSelectedEditingPost}
+            selectedEditingPost={selectedEditingPost}
           />
         )}
       </BodyContainer>
       <FloatButton
         icon={<PlusOutlined />}
         tooltip={<div>Create Blog</div>}
-        onClick={() => setCreateBlog(true)}
+        onClick={() => {
+          setCreateBlog(true);
+          setEditPost(false);
+          setSelectedEditingPost(null);
+        }}
       />
       <Modal
         title='Create Blog'
-        visible={createBlog}
-        onOk={() => setCreateBlog(false)}
+        visible={createBlog || editPost}
+        footer={null}
         onCancel={() => {
           setCreateBlog(false);
+          setEditPost(false);
         }}
       >
-        <CreateBlog />
+        <CreateBlog
+          editPost={editPost}
+          setEditPost={setEditPost}
+          setSelectedEditingPost={setSelectedEditingPost}
+          selectedEditingPost={selectedEditingPost}
+          onClose={() => {
+            setCreateBlog(false);
+            setEditPost(false);
+            setSelectedEditingPost(null);
+          }}
+          description={description}
+          handleChangeDescription={handleChangeDescription}
+        />
       </Modal>
       {selectedPost && (
         <Modal
