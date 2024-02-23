@@ -60,7 +60,9 @@ const Body = () => {
 
   const getAllPosts = async () => {
     try {
-      const posts = await apiInstance.get('/get-posts');
+      const posts = await apiInstance.get('/get-posts', {
+        withCredentials: true,
+      });
       setBlogPosts(posts.data.data);
       getFavouritePostIds(userDetails.id);
     } catch (error) {
@@ -70,7 +72,9 @@ const Body = () => {
 
   const fetchTrendingData = async () => {
     try {
-      const response = await apiInstance.get('/trending-posts');
+      const response = await apiInstance.get('/trending-posts', {
+        withCredentials: true,
+      });
       setTrendingPosts(response.data.data);
     } catch (error) {
       console.log(error);
@@ -79,7 +83,9 @@ const Body = () => {
 
   const getFavouritePostIds = async (userId) => {
     try {
-      const response = await apiInstance.get(`/get-favourite-posts/${userId}`);
+      const response = await apiInstance.get(`/get-favourite-posts/${userId}`, {
+        withCredentials: true,
+      });
       setFavouritePosts(response.data.data);
     } catch (e) {
       console.log(e);
@@ -87,9 +93,15 @@ const Body = () => {
   };
   const getSummary = async () => {
     try {
-      const response = await apiInstance.post('/summarise', {
-        postContent: selectedPost.content,
-      });
+      const response = await apiInstance.post(
+        '/summarise',
+        {
+          postContent: selectedPost.content,
+        },
+        {
+          withCredentials: true,
+        }
+      );
       setPostSummary(response.data.data.promptResponse);
     } catch (e) {
       console.log(e);

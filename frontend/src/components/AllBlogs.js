@@ -69,10 +69,22 @@ const AllBlogs = ({
       setUserLikedPost(userLikedPost.filter((id) => id !== postId));
     }
     try {
-      await apiInstance.post(`/posts/${postId}/like`, {
-        userId: userDetails.id,
-        like,
-      });
+      await apiInstance.post(
+        `/posts/${postId}/like`,
+        {
+          userId: userDetails.id,
+          like,
+        },
+        {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+          },
+        }
+        // {
+        //   withCredentials: true,
+        // }
+      );
     } catch (e) {
       console.log(e);
     }
@@ -85,10 +97,16 @@ const AllBlogs = ({
       setFavouritePosts(favouritePosts.filter((id) => id !== postId));
     }
     try {
-      await apiInstance.post(`/posts/${postId}/favourite`, {
-        userId: userDetails.id,
-        isFavourite,
-      });
+      await apiInstance.post(
+        `/posts/${postId}/favourite`,
+        {
+          userId: userDetails.id,
+          isFavourite,
+        },
+        {
+          withCredentials: true,
+        }
+      );
     } catch (e) {
       console.log(e);
     }
@@ -96,7 +114,9 @@ const AllBlogs = ({
 
   const deletePost = async ({ postId }) => {
     try {
-      await apiInstance.delete(`/delete-post/${postId}`);
+      await apiInstance.delete(`/delete-post/${postId}`, {
+        withCredentials: true,
+      });
     } catch (e) {
       console.log(e);
     }

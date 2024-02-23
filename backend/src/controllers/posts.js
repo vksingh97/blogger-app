@@ -64,8 +64,9 @@ module.exports = {
     }
     try {
       const payload = { userId, postId, like };
-      const response = await postService.updatePostLikes({ payload });
+      const response = await postService.updatePostLikes({ payload, res });
       if (response.ok) {
+        return res.json({});
         return res.success({ data: response.data });
       } else {
         return res.failure({ msg: response.err });

@@ -82,10 +82,14 @@ const CreateBlog = ({
 
     if (!editPost) {
       console.log('1', formData);
-      await apiInstance.post('/create-blog', formData);
+      await apiInstance.post('/create-blog', formData, {
+        withCredentials: true,
+      });
     } else {
       console.log('2', selectedEditingPost, formData);
-      await apiInstance.put(`/edit-post/${selectedEditingPost._id}`, formData);
+      await apiInstance.put(`/edit-post/${selectedEditingPost._id}`, formData, {
+        withCredentials: true,
+      });
     }
     setEditPost(null);
     onClose();

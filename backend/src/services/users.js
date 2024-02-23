@@ -62,11 +62,6 @@ module.exports = {
             expiresIn: '1h',
           }
         );
-        console.log(token);
-        res.cookie('authToken', token, {
-          httpOnly: true,
-        });
-        console.log(res);
 
         return {
           ok: true,
@@ -74,6 +69,7 @@ module.exports = {
             username: resp.username,
             email: resp.email,
             id: resp._id.toString(),
+            token,
           },
         };
       }

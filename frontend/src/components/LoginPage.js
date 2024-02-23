@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { updateUserDetails } from '../store/userDetails/userDetailsSlice';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const apiInstance = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL,
@@ -32,6 +33,9 @@ const LoginPage = () => {
     const response = await apiInstance.post('/login', data);
 
     if (response && response.data && response.data.ok) {
+      Cookies.set('authToken', response.data.data.token, {
+        expires: 7,
+      });
       dispatch(
         updateUserDetails({
           email: response.data.data.email,
