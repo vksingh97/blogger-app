@@ -12,11 +12,11 @@ require('./redisClient');
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(cors());
 app.use(express.text({ limit: '25mb' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(responseHandlers);
 app.use(routes);
-app.use(cors());
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use(cookieParser());
 

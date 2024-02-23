@@ -20,7 +20,7 @@ const upload = multer({ storage: storage });
 router.get('/', (_req, res) => res.send('Welcome to Blogger App!'));
 
 // Route to handle GET requests for retrieving all posts
-router.get('/get-posts', authenticate, postController.getAllPosts);
+router.get('/get-posts', postController.getAllPosts);
 
 // Route to handle POST requests for creating a new blog post
 router.post('/create-blog', upload.single('file'), postController.createBlog);

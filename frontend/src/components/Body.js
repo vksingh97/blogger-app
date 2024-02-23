@@ -30,9 +30,9 @@ const BodyContainer = styled.div`
 const ModalContent = styled.div`
   padding: 20px;
 `;
-
+console.log(process.env.REACT_APP_API_BASE_URL);
 const apiInstance = axios.create({
-  baseURL: 'http://localhost:6001/',
+  baseURL: process.env.REACT_APP_API_BASE_URL,
 });
 
 const Body = () => {

@@ -7,7 +7,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const apiInstance = axios.create({
-  baseURL: 'http://localhost:6001/',
+  baseURL: process.env.REACT_APP_API_BASE_URL,
 });
 
 const LoginPage = () => {

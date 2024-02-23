@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import axios from 'axios';
 
 const apiInstance = axios.create({
-  baseURL: 'http://localhost:6001/',
+  baseURL: process.env.REACT_APP_API_BASE_URL,
 });
 
 const { Meta } = Card;
@@ -125,8 +125,8 @@ const AllBlogs = ({
                     style={{ fontSize: '20px' }}
                     key='edit'
                     onClick={() => {
-                      setEditPost(true);
                       setSelectedEditingPost(item);
+                      setEditPost(true);
                     }}
                   />
                 ) : (
