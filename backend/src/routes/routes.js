@@ -20,12 +20,16 @@ const upload = multer({ storage: storage });
 router.get('/', (_req, res) => res.send('Welcome to Blogger App!'));
 
 // Route to handle GET requests for retrieving all posts
-router.get('/get-posts', authenticate, postController.getAllPosts);
+router.get(
+  '/get-posts',
+  //  authenticate,
+  postController.getAllPosts
+);
 
 // Route to handle POST requests for creating a new blog post
 router.post(
   '/create-blog',
-  authenticate,
+  // authenticate,
   upload.single('file'),
   postController.createBlog
 );
@@ -37,13 +41,17 @@ router.post('/login', userController.loginUser);
 
 router.post('/posts/:postId/like', postController.updatePostLikes);
 
-router.get('/trending-posts', authenticate, postController.getTrendingPosts);
+router.get(
+  '/trending-posts',
+  //  authenticate,
+  postController.getTrendingPosts
+);
 
 router.post('/posts/:postId/favourite', postController.updateFavourites);
 
 router.get(
   '/get-favourite-posts/:userId',
-  authenticate,
+  // authenticate,
   postController.getUserTrendingPosts
 );
 
