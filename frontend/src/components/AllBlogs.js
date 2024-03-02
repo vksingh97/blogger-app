@@ -80,10 +80,10 @@ const AllBlogs = ({
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
           },
+        },
+        {
+          withCredentials: true,
         }
-        // {
-        //   withCredentials: true,
-        // }
       );
     } catch (e) {
       console.log(e);
@@ -102,6 +102,12 @@ const AllBlogs = ({
         {
           userId: userDetails.id,
           isFavourite,
+        },
+        {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+          },
         },
         {
           withCredentials: true,
