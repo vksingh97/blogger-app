@@ -120,9 +120,18 @@ const AllBlogs = ({
 
   const deletePost = async ({ postId }) => {
     try {
-      await apiInstance.delete(`/delete-post/${postId}`, {
-        withCredentials: true,
-      });
+      await apiInstance.delete(
+        `/delete-post/${postId}`,
+        {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+          },
+        },
+        {
+          withCredentials: true,
+        }
+      );
     } catch (e) {
       console.log(e);
     }

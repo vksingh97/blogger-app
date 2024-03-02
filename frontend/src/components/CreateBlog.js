@@ -82,14 +82,34 @@ const CreateBlog = ({
 
     if (!editPost) {
       console.log('1', formData);
-      await apiInstance.post('/create-blog', formData, {
-        withCredentials: true,
-      });
+      await apiInstance.post(
+        '/create-blog',
+        formData,
+        {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+          },
+        },
+        {
+          withCredentials: true,
+        }
+      );
     } else {
       console.log('2', selectedEditingPost, formData);
-      await apiInstance.put(`/edit-post/${selectedEditingPost._id}`, formData, {
-        withCredentials: true,
-      });
+      await apiInstance.put(
+        `/edit-post/${selectedEditingPost._id}`,
+        formData,
+        {
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+          },
+        },
+        {
+          withCredentials: true,
+        }
+      );
     }
     setEditPost(null);
     onClose();
